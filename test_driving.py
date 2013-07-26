@@ -157,3 +157,128 @@ c) Calculating
 d) Writing
 
 """
+
+Parse_tsv.py
+============
+
+#!/usr/bin/env python
+
+import re
+
+class HeaderParser():
+    """Useful for making sense of a header line."""
+    def extract_zt(self, s):
+        """From a column label, gets numerical ZT time."""
+        assert "ZT" in s
+        m = re.search("ZT([0-9]\.?[0-9]*)", s)
+        if m == None:
+            raise Exception("Badly formed ZT time, bro!")
+        return float(m.group(1))
+    def parse_header(self, h, f=None):
+        """Gets a list of ZT times from a header."""
+        if f == None:
+            f = self.extract_zt
+        return [f(w) for w in h.split()[1:]]
+
+
+Parsetsv_spec.py
+================
+#!/usr/bin/env python
+
+import unittest
+import random
+from parsetsv import HeaderParser
+
+class ExtractZTSpec(unittest.TestCase):
+    """Describe the method for pulling a ZT time out of a column label."""
+    def setUp(self):
+        self.parser = HeaderParser()
+    def test_zt_requirement(self):
+        """It should require that a ZT substring be in the label."""
+        test_passes = False
+        try:
+            self.parser.extract_zt("FOOBAR")
+            test_passes = False
+        except:
+            test_passes = True
+        self.assertTrue(test_passes)
+    def test_time_requirement(self):
+        """It should require that some form of time be in the label."""
+        test_string = "AlanTimeZT"
+        test_passes = False
+        try:
+            self.parser.extract_zt(test_string)
+            test_passes = False
+        except:
+            test_passes = True
+        self.assertTrue(test_passes)
+    def test_integral_time(self):
+        """It should handle integral times correctly."""
+        test_time   = random.randint(0,24)
+        test_string = "AlanTimeZT{0}".format(test_time)
+        self.assertEquals(self.parser.extract_zt(test_string), test_time)
+    def test_decimal_time(self):
+        """It should handle floating point times correctly."""
+        test_time   = random.random() * 24
+        test_string = "AndyTimeZT{0}".format(test_time)
+        expected = test_time
+        computed = self.parser.extract_zt(test_string)
+        delta = computed - expected
+        self.assertTrue(delta < 0.001)
+    def test_nonsense_decimal(self):
+        """ . by itself should not be a time."""
+        test_passes = False
+        try:
+            self.parser.extract_zt("ZT.")
+            test_passes = False
+        except Exception as e:
+            test_passes = True
+        self.assertTrue(test_passes)
+
+class ParseHeaderSpec(unittest.TestCase):
+    """Describe the method for parsing a WHOOOOOLE header line!"""
+    def setUp(self):
+        self.parser = HeaderParser()
+    def test_empty_case(self):
+        """It should return empty list for no ZT's."""
+        self.assertEquals([], self.parser.parse_header("", extract_mock))
+        self.assertEquals([], self.parser.parse_header("#\t", extract_mock))
+    def test_discard_first(self):
+        """It should lose the first item in the list."""
+        test_length = random.randint(0,100)
+        test_string = "#\t{0}".format("\t".join(map(str, xrange(test_length))))
+        expected = test_length
+        computed = len(self.parser.parse_header(test_string, extract_mock))
+        self.assertEquals(expected, computed)
+    def test_correct_parsing(self):
+        """It should [somewhat trivially] do the right thing."""
+        test_length = random.randint(0,100)
+        test_string = "#\t{0}".format("\t".join(map(str, xrange(test_length))))
+        expected = [extract_mock(s) for s in xrange(test_length)]
+        computed = self.parser.parse_header(test_string, extract_mock)
+        self.assertEquals(expected, computed)
+    def test_default_parser(self):
+        """It should choose a sensible default -- ZT parsing."""
+        stringit = lambda s: "ZT{0}".format(s)
+        test_length = random.randint(0,100)
+        test_string = "#\t{0}".format("\t".join(map(stringit, xrange(test_length))))
+        expected =  range(test_length)
+        computed = self.parser.parse_header(test_string)
+        self.assertEquals(expected, computed)
+
+class AcceptanceSpec(unittest.TestCase):
+    """Define integrated behaviour."""
+    def test_mock_parsing(self):
+        """It should correctly parse that fake header in header.mock."""
+        parser = HeaderParser()
+        self.assertEquals(
+            parser.parse_header(open("header.mock",'r').readline()),
+            [2,4,6,8,10,12]
+        )
+
+def extract_mock(s):
+    return "!{0}+@".format(s)
+
+if __name__ == "__main__":
+    unittest.main()
+
