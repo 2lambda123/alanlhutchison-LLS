@@ -26,7 +26,6 @@ class ExtractNodes(unittest.TestCase):
         except:
             test_passes = True
         self.assertTrue(test_passes)
-
     def test_find_node(self):
         """Make sure there are only alphanumeric nodes in file"""
         test_passes = False
@@ -37,8 +36,19 @@ class ExtractNodes(unittest.TestCase):
             test_passes = True
         self.assertTrue(test_passes)
 
+    def test_assign_no(self):
+        """Does assign_no_to_node give dict and list?"""
+        test_list = []
+        for i in xrange(random.randint(0,100)):
+            test_length = random.randint(0,100)
+            test_string = "#\t{0}".format("\t".join(map(str, xrange(test_length))))
+            test_list.append(test_string)
+        self.parser.assign_no_to_node(test_list)
+        ##### Still need to write the asserts and errors 
+
     def test_assign_node_num(self):
         """Give every node a number value in dict"""
+        pass
 
 class ExtractEdges(unittest.TestCase)
 
@@ -47,8 +57,11 @@ class ExtractEdges(unittest.TestCase)
         Should be in a Node, (Node,#),(Node, #) format)"""
         pass
 
+
     def 
 
+
+class CompareEdges(self):
 
     
 
