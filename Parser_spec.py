@@ -11,13 +11,14 @@ class ExtractNodes(unittest.TestCase):
         """Make sure that commas are in the file"""
         test_passes = False
         try: 
-            self.parser.extract_nodes("parse_test")
+            self.parser.extract_nodes("no_commas")
             test_passes = False
-        except:
+        except Exception as e:
+            print(e)
             test_passes = True
         self.assertTrue(test_passes)
-    def test_find_node(self):
-        """Make sure there are alphanumeric nodes in file"""
+    def test_no_empty(self):
+        """Make sure there are no empty nodes"""
         test_passes = False
         try:
             self.parser.extract_nodes("all_commas")
@@ -26,6 +27,18 @@ class ExtractNodes(unittest.TestCase):
             test_passes = True
         self.assertTrue(test_passes)
 
+    def test_find_node(self):
+        """Make sure there are only alphanumeric nodes in file"""
+        test_passes = False
+        try:
+            self.parser.extract_nodes("bad_nodes")
+            test_passes = False
+        except Exception:
+            test_passes = True
+        self.assertTrue(test_passes)
+
+    
+    
 
 
 
