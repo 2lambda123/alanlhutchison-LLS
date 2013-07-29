@@ -39,6 +39,7 @@ class ExtractNodes(unittest.TestCase):
 
     def test_assign_node_num(self):
         """Give every node a number value in dict"""
+        pass
 
 class ExtractEdges(unittest.TestCase)
 
@@ -47,8 +48,8 @@ class ExtractEdges(unittest.TestCase)
         Should be in a Node, (Node,#),(Node, #) format)"""
         pass
 
-    def 
 
+class Compare
 
     
 
