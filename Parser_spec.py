@@ -2,6 +2,7 @@
 
 from Parser import NodeParser
 from Parser import EdgeParser
+from Parser import LLS_Calculator
 import unittest
 import random
 import string
@@ -20,6 +21,7 @@ class ExtractNodes(unittest.TestCase):
             print(e)
             test_passes = True
         self.assertTrue(test_passes)
+
     def test_no_empty(self):
         """Make sure there are no empty nodes"""
         test_passes = False
@@ -43,7 +45,7 @@ class ExtractNodes(unittest.TestCase):
     def test_nodes_unique(self):
         """Make sure nodes are unique in list"""
         test_list = []
-        for i in xrange(random.randint(1,100)):
+        for _ in xrange(random.randint(2,100)):
             stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
             test_list.append(stng)
         test_string = ",".join(test_list)
@@ -71,7 +73,7 @@ class ExtractNodes(unittest.TestCase):
     def test_assign_node_num(self):
         """Give every node a number value in dict"""
         test_list = []
-        for i in xrange(random.randint(1,100)):
+        for i in xrange(random.randint(2,100)):
             stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
             test_list.append(stng)
         test_string = ",".join(test_list)
@@ -98,9 +100,9 @@ class ExtractEdges(unittest.TestCase):
         """Make sure the edges are entered correctly
         Should be in a Node, (Node,#),(Node, #) format)"""
         test = []
-        for __ in xrange(random.randint(2,50)):
+        for __ in xrange(random.randint(2,10)):
             test_list = []
-            for _ in xrange(random.randint(2,100)):
+            for _ in xrange(random.randint(2,10)):
                 stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
                 test_list.append(stng)
             test.append(test_list)
@@ -124,8 +126,48 @@ class ExtractEdges(unittest.TestCase):
         for i in xrange(len(test)):
             lead = test[i][0].split(",")[0]
             self.assertTrue(lead in d)
+
+
+class LLS(unittest.TestCase):
+    """Does LLS work properly"""
+    def SetUp(self):
+        self.calc = LLS_Calculator()
+
+    def test_CompareEdges(self):
+        """Does CompareEdges work?"""
+        d = {}
+        for _ in xrange(random.randint(1,10)):
+            lead = ""
+            for __ in xrange(0,random.randint(2,10)):
+                stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
+                if lead == "":
+                    lead = stng
+                    d.setdefault(lead,[])
+                else:
+                    d[lead].append((stng,random.random()))
+            for lead in d.keys():
+                opp = d[lead][random.randint(0,len(d[lead])-1)][0]
+                self.assertTrue(self.calc.CompareEdges((lead,opp),d))
+
+
+
+    def test_num(self):
+        d = {}
+        for _ in xrange(random.randint(1,10)):
+            lead = ""
+            for __ in xrange(0,random.randint(2,10)):
+                stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
+                if lead == "":
+                    lead = stng
+                    d.setdefault(lead,[])
+                else:
+                    d[lead].append((stng,random.random()))        
         
-
-
+    def returns_float(self):
+        """Prob calculators return a float"""
+        num = random.random()
+        denom = random.random()
+        self.assertTrue(type(self.calc.LLS(num,denom)),float)
+                
 if __name__ == "__main__":
     unittest.main()

@@ -2,6 +2,7 @@
 
 import re
 import sys
+import math
 
 def main():
     fn = sys.argv[1]
@@ -78,9 +79,43 @@ class EdgeParser():
             new_edges[lead].append(edge)
         return new_edges    
 
-    def CompareEdges(self,edge,list):
+            
+        
+class LLS_Calculator():
+    """Will calculate an LLS for data"""
+    def CompareEdges(self,edge,dict):
         """Does edge exist in list? """
+        """Does not assume symmetric edge lists, though you should probably have them"""
+        # Edge is a tuple with two nodes
+        # Dict is a dictionary of node-keys and tuple (node,float) values
+        if edge[0] in dict.keys():
+            if edge[1] in [x[0] for x in dict[edge[0]]]:
+                return True
+            else:
+                return False
+        else:
+            if edge[1] in dict.keys():
+                if edge[0] in [x[0] for x in dict[edge[1]]]:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+    def numerator(data,gold):
+        """Finds probabilities of edges in data relative to gold"""
         pass
+
+
+    def denominator(gold,size):
+        """Finds probablilites of gold edges relative to all possible edges"""
+        pass
+
+
+    def LLS(num,denom):
+        """Returns the LLS"""
+        return math.log(num/denom)
+        
 
 if __name__=="__main__":
     main()
