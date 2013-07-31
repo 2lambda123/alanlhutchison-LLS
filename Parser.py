@@ -15,28 +15,39 @@ class NodeParser():
         """From fn, get csv nodes"""
         with open(fn,'r') as f:
             line  = f.readline()
-            nodes = string_to_nodes(line)
+            nodes = self.string_to_nodes(line)
         return nodes
 
     def string_to_nodes(self,line):
         assert "," in line
-        assert re.search("[\W][^,]",line) is None
         nodes = line.split(",")
+        # takes out empty nodes
         nodes = [node for node in nodes if (node!="")]
+        # will remove duplicates
+        new_nodes = []
+        for node in nodes:
+            if node not in new_nodes:
+                new_nodes.append(node)
+            else:
+                print node, "was a duplicate and was removed!"
+        nodes = new_nodes
         assert nodes != []
         nodes = sorted(nodes)
         return nodes
 
     def assign_no_to_node(self,list):
+        """list should be unique"""
         list = sorted(list)
         d = {}
-        for i,node in iter(list):
+        for i,node in enumerate(list):
+            #print i,node
             d[node] = i 
         return d,len(d)
     
     def CompareNodes(self,s,list):
-        """Is s found in the list? """
-        pass
+        """Return true if s is in list """
+        return s in list
+
 
 class EdgeParser():
     """Will read edegs from a CSV file"""
@@ -49,16 +60,13 @@ class EdgeParser():
         return new_edges
 
     def line_to_edges(self,line,new_edges):
-        try:
-            assert "," in line
-            assert "(" in line
-            assert ")" in line
-        except Exception as e:
-            print(e)
-            pass
+        assert "," in line
+        assert "(" in line
+        assert ")" in line
         edges = line.split("(")
         lead = edges[0].strip()
         lead = lead.strip(",")
+        lead = lead.strip()
         new_edges.setdefault(lead,[])
         for edge in edges[1:]:
             edge = edge.strip("\n")
@@ -66,7 +74,8 @@ class EdgeParser():
             edge = edge.strip(",")
             edge = edge.strip("\)")
             edge = edge.split(",")
-        new_edges[lead].append(edge)
+            edge = (edge[0],float(edge[1]))
+            new_edges[lead].append(edge)
         return new_edges    
 
     def CompareEdges(self,edge,list):
