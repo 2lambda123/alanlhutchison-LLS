@@ -104,12 +104,47 @@ class LLS_Calculator():
 
     def numerator(self,data,gold):
         """Finds probabilities of edges in data relative to gold"""
-        pass
+        gold_size = 0.0
+        for lead in gold.keys():
+            gold_size += len(gold[lead])
+            
+        epsilon = 0.0000000001
+        match = 0.0
+        not_match = 0.0
+        exp_size = 0.0
+        for lead in data.keys():
+            for hit in data[lead]:
+                exp_size += 1
+                edge = (lead,hit[0])
+                if self.CompareEdges(edge,gold):
+                    match += 1
+                else:
+                    not_match += 1
+        #print gold_size
+        #print match
+        #print not_match
+        #print exp_size
+        if match == 0.0:
+            match = epsilon
+        elif not_match == 0.0:
+            not_match = epsilon
 
+        num1 = match / gold_size 
+        num2 = not_match / gold_size
+        return num1/num2
 
-    def denominator(self,gold,size):
+    def denominator(self,gold,length):
         """Finds probablilites of gold edges relative to all possible edges"""
-        pass
+        size = length * length
+
+        gold_size = 0.0
+        for lead in gold.keys():
+            gold_size += len(gold[lead])
+        
+        den1 = gold_size / size
+        den2 = (1-gold_size) / size
+
+        return den1/den2
 
 
     def LLS(self,num,denom):

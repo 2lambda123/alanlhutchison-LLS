@@ -161,7 +161,19 @@ class LLS_test(unittest.TestCase):
                     d.setdefault(lead,[])
                 else:
                     d[lead].append((stng,random.random()))        
-        
+
+        nodes = []
+        #print d
+        for lead in d.keys():
+            if lead not in nodes:
+                nodes.append(lead)
+            for hit in d[lead]:
+                if hit[0] not in nodes:
+                    nodes.append(hit[0])
+
+        #print 'Look at mah nodez!', nodes
+        length = len(nodes)
+                
         data = {}
         for _ in xrange(random.randint(1,10)):
             for lead in d.keys():
@@ -169,15 +181,17 @@ class LLS_test(unittest.TestCase):
                 for __ in xrange(random.randint(1,len(d[lead]))):
                     edge = d[lead][random.randint(0,len(d[lead])-1)]
                     data[lead].append(edge)
-        
+                    for ___ in xrange(random.randint(0,5)):
+                        stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
+                        edge = (stng,random.random())
+                        data[lead].append(edge)
         gold = d
-        size = len(gold.keys())
         
-        self.calc.numerator(data,gold)
+        
         self.assertNotEquals(self.calc.numerator(data,gold),0)
         self.assertEquals(type(self.calc.numerator(data,gold)),float)
-        self.assertNotEquals(self.calc.denominator(gold,size),0)
-        self.assertEquals(type(self.calc.denominator(data,gold)),float)
+        self.assertNotEquals(self.calc.denominator(gold,length),0)
+        self.assertEquals(type(self.calc.denominator(data,length)),float)
         
     def returns_float(self):
         """Prob calculators return a float"""
