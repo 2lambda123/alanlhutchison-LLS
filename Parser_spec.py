@@ -89,7 +89,7 @@ class ExtractNodes(unittest.TestCase):
         for i in xrange(random.randint(1,100)):
             stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
             test_list.append(stng)
-        self.assertTrue(self.parser.CompareNodes(test_list[random.randint(0,len(test_list))],test_list))
+        self.assertTrue(self.parser.CompareNodes(test_list[random.randint(0,len(test_list)-1)],test_list))
         
 class ExtractEdges(unittest.TestCase):
 
@@ -128,11 +128,10 @@ class ExtractEdges(unittest.TestCase):
             self.assertTrue(lead in d)
 
 
-class LLS(unittest.TestCase):
+class LLS_test(unittest.TestCase):
     """Does LLS work properly"""
-    def SetUp(self):
+    def setUp(self):
         self.calc = LLS_Calculator()
-
     def test_CompareEdges(self):
         """Does CompareEdges work?"""
         d = {}
@@ -150,8 +149,8 @@ class LLS(unittest.TestCase):
                 self.assertTrue(self.calc.CompareEdges((lead,opp),d))
 
 
-
     def test_num(self):
+
         d = {}
         for _ in xrange(random.randint(1,10)):
             lead = ""
@@ -162,6 +161,23 @@ class LLS(unittest.TestCase):
                     d.setdefault(lead,[])
                 else:
                     d[lead].append((stng,random.random()))        
+        
+        data = {}
+        for _ in xrange(random.randint(1,10)):
+            for lead in d.keys():
+                data.setdefault(lead,[])
+                for __ in xrange(random.randint(1,len(d[lead]))):
+                    edge = d[lead][random.randint(0,len(d[lead])-1)]
+                    data[lead].append(edge)
+        
+        gold = d
+        size = len(gold.keys())
+        
+        self.calc.numerator(data,gold)
+        self.assertNotEquals(self.calc.numerator(data,gold),0)
+        self.assertEquals(type(self.calc.numerator(data,gold)),float)
+        self.assertNotEquals(self.calc.denominator(gold,size),0)
+        self.assertEquals(type(self.calc.denominator(data,gold)),float)
         
     def returns_float(self):
         """Prob calculators return a float"""

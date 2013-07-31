@@ -102,17 +102,17 @@ class LLS_Calculator():
             else:
                 return False
 
-    def numerator(data,gold):
+    def numerator(self,data,gold):
         """Finds probabilities of edges in data relative to gold"""
         pass
 
 
-    def denominator(gold,size):
+    def denominator(self,gold,size):
         """Finds probablilites of gold edges relative to all possible edges"""
         pass
 
 
-    def LLS(num,denom):
+    def LLS(self,num,denom):
         """Returns the LLS"""
         return math.log(num/denom)
         
