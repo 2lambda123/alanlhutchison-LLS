@@ -5,11 +5,27 @@ import sys
 import math
 
 def main():
-    fn = sys.argv[1]
-    #a = NodeParser()
-    #a.extract_nodes(fn)
+    fn_nodes = "test/node_list"
+    fn_gold = "test/gold_edges"
+    fn_exp = "test/exp_data"
+    a = NodeParser()
+    nodes = a.extract_nodes(fn_nodes)
+    d_num_nodes, leng = a.assign_no_to_node(nodes)
+    
     b = EdgeParser()
-    b.extract_edges(fn)
+    gold_edges = b.extract_edges(fn_gold)
+    num_gold_edges = b.EdgeNode2Num(gold_edges,d_num_nodes)
+    
+    exp_edges = b.extract_edges(fn_exp)
+    num_exp_edges = b.EdgeNode2Num(exp_edges,d_num_nodes)
+    
+    c = LLS_Calculator()
+
+    num = c.numerator(num_exp_edges,num_gold_edges)
+    den = c.denominator(num_gold_edges,leng)
+    score = c.LLS(num,den)
+    print score
+    
 class NodeParser():
     """Will read nodes from CSV file"""
     def extract_nodes(self,fn):
@@ -30,7 +46,7 @@ class NodeParser():
             if node not in new_nodes:
                 new_nodes.append(node)
             else:
-                print node, "was a duplicate and was removed!"
+                print("Mazel Tov!", node, "was a duplicate and was removed!")
         nodes = new_nodes
         assert nodes != []
         nodes = sorted(nodes)
@@ -78,11 +94,25 @@ class EdgeParser():
             edge = (edge[0],float(edge[1]))
             new_edges[lead].append(edge)
         return new_edges    
-
             
-        
+    def EdgeNode2Num(self,edges,d_node_num):
+        """This program turns edges into their associated integers"""
+        new = {}
+        for lead in edges.keys():
+            new.setdefault(d_node_num[lead],[])
+            for hit in edges[lead]:
+                new[d_node_num[lead]].append((d_node_num[hit[0]],hit[1]))
+        return new
+
+
 class LLS_Calculator():
     """Will calculate an LLS for data"""
+    """
+    num = (exp edges in gold) / (all exp edges - exp edges in gold)
+    denom = (gold edges from all) / (all edges - gold edges from all)
+
+    """
+
     def CompareEdges(self,edge,dict):
         """Does edge exist in list? """
         """Does not assume symmetric edge lists, though you should probably have them"""
@@ -107,7 +137,7 @@ class LLS_Calculator():
         gold_size = 0.0
         for lead in gold.keys():
             gold_size += len(gold[lead])
-            
+        print gold_size
         epsilon = 0.0000000001
         match = 0.0
         not_match = 0.0
@@ -117,38 +147,43 @@ class LLS_Calculator():
                 exp_size += 1
                 edge = (lead,hit[0])
                 if self.CompareEdges(edge,gold):
+                    print edge
                     match += 1
                 else:
                     not_match += 1
-        #print gold_size
-        #print match
-        #print not_match
-        #print exp_size
+
         if match == 0.0:
             match = epsilon
         elif not_match == 0.0:
             not_match = epsilon
-
-        num1 = match / gold_size 
-        num2 = not_match / gold_size
+        print match
+        print not_match
+        num1 = match 
+        num2 = not_match
         return num1/num2
 
     def denominator(self,gold,length):
         """Finds probablilites of gold edges relative to all possible edges"""
-        size = length * length
+        size = length * (length - 1) 
 
         gold_size = 0.0
         for lead in gold.keys():
             gold_size += len(gold[lead])
         
-        den1 = gold_size / size
-        den2 = (1-gold_size) / size
-
+        #print 'Whazzup'
+        #print gold_size
+        #print size
+        den1 = gold_size
+        den2 = size - gold_size 
+        #print den1
+        #print den2
         return den1/den2
 
 
     def LLS(self,num,denom):
         """Returns the LLS"""
+        #print num
+        #print denom
         return math.log(num/denom)
         
 

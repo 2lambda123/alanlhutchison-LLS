@@ -127,6 +127,10 @@ class ExtractEdges(unittest.TestCase):
             lead = test[i][0].split(",")[0]
             self.assertTrue(lead in d)
 
+        def test_EdgeNode2Num(self):
+            """Does EdgeNode2Num work the way we want it to?"""
+            pass
+
 
 class LLS_test(unittest.TestCase):
     """Does LLS work properly"""
@@ -168,11 +172,10 @@ class LLS_test(unittest.TestCase):
             if lead not in nodes:
                 nodes.append(lead)
             for hit in d[lead]:
+                #print 'hit[0] is ',hit[0]
                 if hit[0] not in nodes:
                     nodes.append(hit[0])
 
-        #print 'Look at mah nodez!', nodes
-        length = len(nodes)
                 
         data = {}
         for _ in xrange(random.randint(1,10)):
@@ -185,14 +188,29 @@ class LLS_test(unittest.TestCase):
                         stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
                         edge = (stng,random.random())
                         data[lead].append(edge)
+        
+        for lead in data.keys():
+            if lead not in nodes:
+                nodes.append(lead)
+            for hit in data[lead]:
+                #print 'hit[0] is ',hit[0]
+                if hit[0] not in nodes:
+                    nodes.append(hit[0])
+
+        length = len(nodes)
         gold = d
         
         
-        self.assertNotEquals(self.calc.numerator(data,gold),0)
+        self.assertGreater(self.calc.numerator(data,gold),0)
         self.assertEquals(type(self.calc.numerator(data,gold)),float)
-        self.assertNotEquals(self.calc.denominator(gold,length),0)
+
+        self.assertGreater(self.calc.denominator(gold,length),0)
         self.assertEquals(type(self.calc.denominator(data,length)),float)
+
+        self.assertNotEquals(self.calc.LLS(self.calc.numerator(data,gold),self.calc.denominator(gold,length)),0)
+        self.assertEquals(type(self.calc.LLS(self.calc.numerator(data,gold),self.calc.denominator(data,length))),float)
         
+
     def returns_float(self):
         """Prob calculators return a float"""
         num = random.random()
