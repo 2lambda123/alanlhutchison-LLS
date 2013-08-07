@@ -17,9 +17,12 @@ class Graph():
         self.edges = a_edges
     
     def give_nodes(self):
+        """"This method will return the nodes, but hopefully will be replaced someday"""
         return self.nodes
 
     def give_edges(self):
+        """This method will return the edges, but hopefully will be omitted once
+        the methods for this class are better fleshed out"""
         return self.edges
 
     def Write(self):
