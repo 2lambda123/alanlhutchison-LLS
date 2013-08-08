@@ -4,6 +4,8 @@ import re
 import sys
 import math
 import numpy as np
+from numpy import matrix 
+import scipy as sp
 
 def main():
     pass
@@ -12,18 +14,28 @@ def main():
 
 class Graph():
     """Graph carries edges and nodes"""
-    def __init__(self,d_nodes,a_edges):
+    def __init__(self,d_nodes,mat_edges):
         self.nodes = d_nodes
-        self.edges = a_edges
+        self.edges = mat_edges
     
     def give_nodes(self):
         """"This method will return the nodes, but hopefully will be replaced someday"""
         return self.nodes
 
     def give_edges(self):
-        """This method will return the edges, but hopefully will be omitted once
-        the methods for this class are better fleshed out"""
-        return self.edges
+        """This method will use a paring function to return a binary sparse array
+        of the called edges"""
+        
+        size = len(self.edges)
+        bin = sp.sparse.lil_matrix([1 if thresh(x,self.edges) else 0 for x in self.edges.flatten().tolist()[0] ] ).reshape((size,size))
+        # may rethink depending on input, this setup is good only for signum threshold
+        return bin
+
+
+    def thresh(self,weight,self.edges,var=""):
+        """This function will determine how to threshold a given edge """
+        #np.ndenumerate gives "(index1,index2), value"
+        pass
 
     def Write(self):
         """Will write the nodes and edges as two pkl files"""
@@ -160,6 +172,27 @@ def NodeParser(fn):
 
     return d_nodes
             
+
+def sparse_decider(Array):
+    """Turns array into matrix, decides if it needs to be sparse or not"""
+    mat = np.matrix(Array)
+    # WRITE SOME KIND OF DECIDER TO MAKE IT SPARSE OR NOT
+    return mat
+
+"""
+==============================
+"""
+def CompareGraphs(bin_graph):
+    """Take a binary matrix graph and compare it to another using the lookup table"""
+    pass
+
+
+def CompareEdge(index1,index2,graph1,graph2):
+    pass
+    
+
+
+
 
 if __name__ == "__main__":
     main()
