@@ -15,68 +15,73 @@ import time
 def main():
     fn_dict = sys.argv[1]
     fn_gold = sys.argv[2]
-    fn_exp = sys.argv[3:]
+    fns_exp = sys.argv[3:]
 
-    input_Staph_spear(fn_dict,fn_gold,fn_exp)
-    #input2(fn_dict,fn_gold,fn_exp)
+    #input_spear_staph(fn_dict,fn_gold,fns_exp)
+    input2(fn_dict,fn_gold,fns_exp)
 
 
-def input_Staph_spear(fn_dict,fn_gold,fn_exp):
-    d_nodes = NodeParser(fn_dict)    
+def input_spear_staph(fn_dict,fn_gold,fns_exp):
 
-    d_gold_edges = SimpleEdgeParser(fn_gold)
-    m_gold = Dict2Matrix(d_nodes,d_gold_edges,fn_gold+".Graph")
-    g_gold = Graph(d_nodes,m_gold)
+    edge_maker = simple_thresh
+
+    d_nodes = node_parser(fn_dict)    
+
+    d_gold_edges = simple_edge_parser(fn_gold)
+    m_gold = dict2matrix(d_nodes,d_gold_edges,fn_gold+".Graph")
+    g_gold = Graph(d_nodes,m_gold,edge_maker)
 
     gs_exp = []
     """Next will be to make these different parsing choices flags"""
-    for fn in fn_exp:
+    ### TURN THIS INTO A MAP
+    for fn in fns_exp:
         d_exp_edges = ThreePartEdgeParser(fn)
-        m_exp = Dict2Matrix(d_nodes,d_exp_edges,fn+".Graph")
+        m_exp = dict2matrix(d_nodes,d_exp_edges,fn+".Graph")
         print 'Starting Graph ',time.time()
-        g_exp = Graph(d_nodes,m_exp)
+        g_exp = Graph(d_nodes,m_exp,edge_maker)
         print 'Finishing Graph', time.time()
         gs_exp.append(g_exp)
 
-    WeightedSum(gs_exp,g_gold)
+    weighted_sum(gs_exp,g_gold)
 
 
-def input2(fn_dict,fn_gold,fn_exp):
-    d_nodes = NodeParser(fn_dict)    
-    d_gold_edges =SimpleEdgeParser(fn_gold)
-    m_gold = Dict2Matrix(d_nodes,d_gold_edges,fn_gold+".Graph")
-    
-    g_gold = Graph(d_nodes,m_gold)
+def input2(fn_dict,fn_gold,fns_exp):
+    edge_maker = simple_thresh
+    d_nodes = node_parser(fn_dict)    
+    d_gold_edges =simple_edge_parser(fn_gold)
+    m_gold = dict2matrix(d_nodes,d_gold_edges,fn_gold+".Graph")
+    g_gold = Graph(d_nodes,m_gold,edge_maker)
 
     gs_exp = []
     """Next will be to make these different parsing choices flags"""
-    for fn in fn_exp:
-        d_exp_edges = SimpleEdgeParser(fn)
-        m_exp = Dict2Matrix(d_nodes,d_exp_edges,fn+".Graph")
-        g_exp = Graph(d_nodes,m_exp)
+    for fn in fns_exp:
+        d_exp_edges = simple_edge_parser(fn)
+        m_exp = dict2matrix(d_nodes,d_exp_edges,fn+".Graph")
+        g_exp = Graph(d_nodes,m_exp,edge_maker)
         gs_exp.append(g_exp)
 
-    WeightedSum(gs_exp,g_gold)
+    weighted_sum(gs_exp,g_gold)
 
 
 def test_with_random_data():
     size = random.randint(3,12)
     d = dict(zip([i for i in st.uppercase[:size]],range(size)))
-    gold = Graph(d,np.matrix([1 if random.random()>0.7 else 0 for  _ in xrange(size*size)]).reshape((size,size)))
+    gold = Graph(d,np.matrix([1 if random.random()>0.7 else 0 for  _ in xrange(size*size)]).reshape((size,size)),edge_maker)
     mat_list = [np.matrix([random.random() \
                for _ in xrange(size*size)]).reshape((size,size)) \
                for __ in xrange(4)]
-    graph_list = [Graph(d,mat) for mat in mat_list]
-    ws = WeightedSum(graph_list,gold)
+    graph_list = [Graph(d,mat,edge_maker) for mat in mat_list]
+    ws = weighted_sum(graph_list,gold)
 
 
 
 class Graph():
     """Graph carries edges and nodes"""
-    def __init__(self,d_nodes,mat_edges):
+    def __init__(self,d_nodes,matrix_edges,edge_maker=lambda m:m):
         self.nodes = d_nodes
-        self.edges = mat_edges
-    
+        self.edges = matrix_edges
+        self.maker = edge_maker
+
     def give_nodes(self):
         """"This method will return the nodes, but hopefully will be replaced someday"""
         return self.nodes
@@ -84,29 +89,43 @@ class Graph():
     def give_edges(self):
         """This method will use a paring function to return a binary sparse array
         of the called edges"""
+        print "self.edges is", self.edges
         print "In give_edges, Generalissimo: ",time.time()
-        size = len(self.edges)
-        bin = scipy.sparse.lil_matrix(np.zeros((size,size)))
+        #size = len(self.edges)
+        #bin = scipy.sparse.lil_matrix(np.zeros((size,size)))
         #bin = np.matrix(np.zeros((size,size)),'bool')
+        #sparlil = scipy.sparse.lil_matrix(self.edges)
+        
+        print "type(self.edges) is ", type(self.edges)
+        fctn = np.frompyfunc(self.maker,1,1)
+        bool_matrix = fctn(self.edges)
+        print "bool_matrix is ", bool_matrix
+        print "type(bool_matrix) is", type(bool_matrix)
+
+        print bool_matrix[0]
+        print bool_matrix[0,0]
+        print type(bool_matrix[0,0])
+
+        """
+        print self.edges.shape
+        bool = np.matrix(np.zeros((self.edges.shape[0],self.edges.shape[0])))
         for (i,j),k in np.ndenumerate(self.edges):
-            bin[i,j]=self.thresh((i,j),k)
-        print "Filled matrix via thresh, Captain: ",time.time()
-        bin = scipy.sparse.csc_matrix(bin)
+            bool[i,j]=self.maker(k)
+            
+        bool_matrix = bool
+        """
+        
+        print "Now bool_matrix is ", bool_matrix
+        print "Now bool_matrix is type ", type(bool_matrix)
+        print bool_matrix[0]
+        print bool_matrix[0,0]      
+        print type(bool_matrix[0,0])      
+  
+        bool_matrix = scipy.sparse.lil_matrix(bool_matrix)
+        bool_matrix = scipy.sparse.csc_matrix(bool_matrix)
+        #bool_matrix = scipy.sparse.csc_matrix(scipy.sparse.lil_matrix(bool_matrix))
         print "Made it a CSC, Admiral: ", time.time()
-        return bin
-
-
-    def map_thresh(self,indecies):
-        pass
-    
-    def thresh(self,indecies,weight,var=""):
-        """This function will determine how to threshold a given edge """
-        #np.ndenumerate gives "(index1,index2), value"
-        cutoff = 0.9
-        if abs(weight)> 0.9:
-            return 1
-        else:
-            return 0
+        return bool_matrix
 
     def Write(self):
         """Will write the nodes and edges as two pkl files"""
@@ -119,10 +138,25 @@ class Graph():
 ==================================================
 """
 
-def SimpleEdgeParser(fn):
+###DO THAT FROMPYFUNC DANCE
+
+def simple_thresh(weight):
+    threshold = 0.9
+    return 1 if weight > 0.9 else 0
+
+def thresh(indecies,weight,var=""):
+    """This function will determine how to threshold a given edge """
+    #np.ndenumerate gives "(index1,index2), value"
+    cutoff = 0.9
+    if abs(weight)> 0.9:
+        return 1.0
+    else:
+        return 0.0
+
+def simple_edge_parser(fn):
     """Parses a file of A,B \n A,C"""
     """Outputs a dictionary of A:(B,1)"""
-    print 'In SimpleEdgeParser ',time.time()
+    print 'In simple_edge_parser ',time.time()
     new_edges = {}
     with open(fn,'r') as f:
         for line in f:
@@ -181,11 +215,11 @@ def EdgeParser(fn):
     return d_nodes, new_edges    
 
 
-def Dict2Matrix(d_nodes,d_edges,fn_out):
-    print 'In Dict2Matrix ', time.time()
+def dict2matrix(d_nodes,d_edges,fn_out):
+    print 'In dict2matrix ', time.time()
     size = len(d_nodes.keys())
     mat = np.matrix(np.zeros((size,size)))
-
+    print "initially type(mat) in dict2matrix is", type(mat)
     with open(fn_out+".badnodes",'w') as gg:
         for i,lead in enumerate(sorted(d_edges.keys())):
             others = d_edges[lead]
@@ -194,7 +228,8 @@ def Dict2Matrix(d_nodes,d_edges,fn_out):
                     mat[i,d_nodes[other[0]]] = other[1]
                 else:
                     gg.write(other[0]+"\n")
-
+    print "mat in dict2matrix is ", mat
+    print "type(mat) in dict2matrix is", type(mat)
     output = fn_out
     
     with open(output,'w') as g:
@@ -266,9 +301,9 @@ def pickle_to_readable(pkl_matrix,pkl_nodes):
 
     return d_nodes,mat
 
-def NodeParser(fn):
+def node_parser(fn):
     """Parses a list of nodes, outputs a dictionary"""
-    print 'In NodeParser ', time.time()
+    print 'In node_parser ', time.time()
     with open(fn,'r') as f:
         for line in f:
             assert "," in line
@@ -291,13 +326,14 @@ def sparse_decider(mat):
 """
 ==============================
 """
-def CompareGraphs(exp,gold_bin):
+def compare_graphs(exp,gold_bin):
     """Take a Graph object and compare it to another"""
-    print 'In CompareGraph ', time.time()
+    print 'In compare_graph ', time.time()
     exp_bin = exp.give_edges()
     print "Methinks you might enjoy thine exp_bin edges, sire: ",time.time()
     #gold_bin = gold.give_edges()
     print "Bonjour, cela sont ton gold_bin edges, monsieur: ", time.time()
+    print type(exp_bin), "is exp_bin type"
     max_size = exp_bin.shape[0]
     print "Whao, that size is huge! ",time.time()
     poss = (max_size -1) * max_size 
@@ -308,19 +344,22 @@ def CompareGraphs(exp,gold_bin):
     print "Intersected that fish, what up: ",time.time()
     isct = isct.astype(int)
     print "Made it an int, can't stop me now", time.time()
-    #print isct
+    print isct
     #exp_sum  = float(sum(exp_bin.flatten().tolist()[0]))
     #gold_sum = float(sum(gold_bin.flatten().tolist()[0]))
 
-
+    print exp_bin
+    print exp_bin.nonzero()
+    print exp_bin.nonzero()[0]
+    print len(exp_bin.nonzero()[0])
     exp_sum  = float(len(exp_bin.nonzero()[0]))
     gold_sum = float(len(gold_bin.nonzero()[0]))
     isct_sum = float(len(isct.nonzero()[0]))
     print "Calculated those values like B-O-S-S: ",time.time()
 
-    #print exp_sum
-    #print gold_sum
-    #print isct_sum
+    print exp_sum
+    print gold_sum
+    print isct_sum
     #isct_sum = float(sum(isct.flatten().tolist()[0]))
 
     assert isct_sum != 0, "No overlap with gold standard"
@@ -335,13 +374,13 @@ def CompareGraphs(exp,gold_bin):
     print LLS
     return LLS
 
-def WeightedSum(graph_list,gold):
+def weighted_sum(graph_list,gold):
     """Combine a list of [score,graph] data, sort, and collapse"""
     print 'In Weighted Sum ',time.time()
     gold_bin = gold.give_edges()
     forget = 1.8
-    #score_graph_list = [[CompareGraphs(exp,gold_bin),exp.edges] for exp in graph_list]
-    score_graph_list = sorted([[CompareGraphs(exp,gold_bin),exp.edges] for exp in graph_list],reverse=True,key=itemgetter(0))
+    #score_graph_list = [[compare_graphs(exp,gold_bin),exp.edges] for exp in graph_list]
+    score_graph_list = sorted([[compare_graphs(exp,gold_bin),exp.edges] for exp in graph_list],reverse=True,key=itemgetter(0))
     enum = [[i,j] for i,j in enumerate(score_graph_list)]
     norm = reduce(lambda x,y: x+y,map(lambda x: forget**(x[0]-1)*x[1][0],enum))
     ws = reduce(lambda x,y: x+y,map(lambda x: forget**(x[0]-1)*x[1][0]*x[1][1],enum))
