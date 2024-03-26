@@ -4,8 +4,8 @@ from Parser import NodeParser
 from Parser import EdgeParser
 from Parser import LLS_Calculator
 import unittest
-import random
 import string
+import secrets
 
 class ExtractNodes(unittest.TestCase):
     """Make sure nodes are pulled out correctly"""
@@ -45,8 +45,8 @@ class ExtractNodes(unittest.TestCase):
     def test_nodes_unique(self):
         """Make sure nodes are unique in list"""
         test_list = []
-        for _ in xrange(random.randint(2,100)):
-            stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
+        for _ in xrange(secrets.SystemRandom().randint(2,100)):
+            stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in xrange(secrets.SystemRandom().randint(1,10)))
             test_list.append(stng)
         test_string = ",".join(test_list)
         #print test_string
@@ -57,8 +57,8 @@ class ExtractNodes(unittest.TestCase):
     def test_assign_no(self):
         """Does assign_no_to_node give dict and list?"""
         test_list = []
-        for i in xrange(random.randint(1,100)):
-            stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
+        for i in xrange(secrets.SystemRandom().randint(1,100)):
+            stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in xrange(secrets.SystemRandom().randint(1,10)))
             test_list.append(stng)
         test_string = ",".join(test_list)
         nodes = self.parser.string_to_nodes(test_string)
@@ -73,8 +73,8 @@ class ExtractNodes(unittest.TestCase):
     def test_assign_node_num(self):
         """Give every node a number value in dict"""
         test_list = []
-        for i in xrange(random.randint(2,100)):
-            stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
+        for i in xrange(secrets.SystemRandom().randint(2,100)):
+            stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in xrange(secrets.SystemRandom().randint(1,10)))
             test_list.append(stng)
         test_string = ",".join(test_list)
         nodes = self.parser.string_to_nodes(test_string)
@@ -86,10 +86,10 @@ class ExtractNodes(unittest.TestCase):
     def test_CompareNodes(self):
         """Does CompareNodes find nodes in the list?"""
         test_list = []
-        for i in xrange(random.randint(1,100)):
-            stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
+        for i in xrange(secrets.SystemRandom().randint(1,100)):
+            stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in xrange(secrets.SystemRandom().randint(1,10)))
             test_list.append(stng)
-        self.assertTrue(self.parser.CompareNodes(test_list[random.randint(0,len(test_list)-1)],test_list))
+        self.assertTrue(self.parser.CompareNodes(test_list[secrets.SystemRandom().randint(0,len(test_list)-1)],test_list))
         
 class ExtractEdges(unittest.TestCase):
 
@@ -100,10 +100,10 @@ class ExtractEdges(unittest.TestCase):
         """Make sure the edges are entered correctly
         Should be in a Node, (Node,#),(Node, #) format)"""
         test = []
-        for __ in xrange(random.randint(2,10)):
+        for __ in xrange(secrets.SystemRandom().randint(2,10)):
             test_list = []
-            for _ in xrange(random.randint(2,10)):
-                stng = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(random.randint(1,10)))
+            for _ in xrange(secrets.SystemRandom().randint(2,10)):
+                stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in xrange(secrets.SystemRandom().randint(1,10)))
                 test_list.append(stng)
             test.append(test_list)
         file = ""
@@ -114,7 +114,7 @@ class ExtractEdges(unittest.TestCase):
                 if j == 0:
                     line = test[i][j]
                 else:
-                    line = line +",("+ test[i][j]+","+str(random.random())+")"
+                    line = line +",("+ test[i][j]+","+str(secrets.SystemRandom().random())+")"
             file = file + line + "\n"
         prepared = file.split("\n")
         d = {}
@@ -139,32 +139,32 @@ class LLS_test(unittest.TestCase):
     def test_CompareEdges(self):
         """Does CompareEdges work?"""
         d = {}
-        for _ in xrange(random.randint(1,10)):
+        for _ in xrange(secrets.SystemRandom().randint(1,10)):
             lead = ""
-            for __ in xrange(0,random.randint(2,10)):
-                stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
+            for __ in xrange(0,secrets.SystemRandom().randint(2,10)):
+                stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for ___ in xrange(secrets.SystemRandom().randint(1,10)))
                 if lead == "":
                     lead = stng
                     d.setdefault(lead,[])
                 else:
-                    d[lead].append((stng,random.random()))
+                    d[lead].append((stng,secrets.SystemRandom().random()))
             for lead in d.keys():
-                opp = d[lead][random.randint(0,len(d[lead])-1)][0]
+                opp = d[lead][secrets.SystemRandom().randint(0,len(d[lead])-1)][0]
                 self.assertTrue(self.calc.CompareEdges((lead,opp),d))
 
 
     def test_num(self):
 
         d = {}
-        for _ in xrange(random.randint(1,10)):
+        for _ in xrange(secrets.SystemRandom().randint(1,10)):
             lead = ""
-            for __ in xrange(0,random.randint(2,10)):
-                stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
+            for __ in xrange(0,secrets.SystemRandom().randint(2,10)):
+                stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for ___ in xrange(secrets.SystemRandom().randint(1,10)))
                 if lead == "":
                     lead = stng
                     d.setdefault(lead,[])
                 else:
-                    d[lead].append((stng,random.random()))        
+                    d[lead].append((stng,secrets.SystemRandom().random()))        
 
         nodes = []
         #print d
@@ -178,15 +178,15 @@ class LLS_test(unittest.TestCase):
 
                 
         data = {}
-        for _ in xrange(random.randint(1,10)):
+        for _ in xrange(secrets.SystemRandom().randint(1,10)):
             for lead in d.keys():
                 data.setdefault(lead,[])
-                for __ in xrange(random.randint(1,len(d[lead]))):
-                    edge = d[lead][random.randint(0,len(d[lead])-1)]
+                for __ in xrange(secrets.SystemRandom().randint(1,len(d[lead]))):
+                    edge = d[lead][secrets.SystemRandom().randint(0,len(d[lead])-1)]
                     data[lead].append(edge)
-                    for ___ in xrange(random.randint(0,5)):
-                        stng = "".join(random.choice(string.ascii_uppercase + string.digits) for ___ in xrange(random.randint(1,10)))
-                        edge = (stng,random.random())
+                    for ___ in xrange(secrets.SystemRandom().randint(0,5)):
+                        stng = "".join(secrets.SystemRandom().choice(string.ascii_uppercase + string.digits) for ___ in xrange(secrets.SystemRandom().randint(1,10)))
+                        edge = (stng,secrets.SystemRandom().random())
                         data[lead].append(edge)
         
         for lead in data.keys():
@@ -213,8 +213,8 @@ class LLS_test(unittest.TestCase):
 
     def returns_float(self):
         """Prob calculators return a float"""
-        num = random.random()
-        denom = random.random()
+        num = secrets.SystemRandom().random()
+        denom = secrets.SystemRandom().random()
         self.assertTrue(type(self.calc.LLS(num,denom)),float)
                 
 if __name__ == "__main__":
